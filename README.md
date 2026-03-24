@@ -1,158 +1,93 @@
-# Phaser Vite TypeScript Template
+# BattleLearn (배틀런)
 
-This is a Phaser 3 project template that uses Vite for bundling. It supports hot-reloading for quick development workflow, includes TypeScript support and scripts to generate production-ready builds.
+Phaser 3 + TypeScript + Vite 기반의 모바일 세로형 교육 배틀 프로토타입입니다.  
+핵심 목표는 **학습 → 문제 해금(스킬화) → 배틀 참여** 루프를 자연스럽게 연결하는 것입니다.
 
-**[This Template is also available as a JavaScript version.](https://github.com/phaserjs/template-vite)**
+## 핵심 컨셉
 
-### Versions
+- 과목(서버) 선택 후 해당 서버 중심으로 학습/배틀 진행
+- 학습에서 맞힌 문제만 공격 스킬 카드로 사용 가능
+- 배틀 입장 조건: 최소 30개 문제(스킬) 보유
+- 1vs1 턴제 배틀
+  - 내 공격 턴: 내가 스킬 카드(문제) 선택, 상대 AI가 방어
+  - 상대 공격 턴: 내가 문제를 풀어 방어
+- HP가 0이 될 때 배틀 종료
 
-This template has been updated for:
+## 기술 스택
 
-- [Phaser 3.90.0](https://github.com/phaserjs/phaser)
-- [Vite 6.3.1](https://github.com/vitejs/vite)
-- [TypeScript 5.7.2](https://github.com/microsoft/TypeScript)
+- `phaser`: `^3.90.0`
+- `vite`: `^6.3.1`
+- `typescript`: `~5.7.2`
 
-![screenshot](screenshot.png)
-
-## Requirements
-
-[Node.js](https://nodejs.org) is required to install dependencies and run scripts via `npm`.
-
-## Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm install` | Install project dependencies |
-| `npm run dev` | Launch a development web server |
-| `npm run build` | Create a production build in the `dist` folder |
-| `npm run dev-nolog` | Launch a development web server without sending anonymous data (see "About log.js" below) |
-| `npm run build-nolog` | Create a production build in the `dist` folder without sending anonymous data (see "About log.js" below) |
-
-## Writing Code
-
-After cloning the repo, run `npm install` from your project directory. Then, you can start the local development server by running `npm run dev`.
-
-The local development server runs on `http://localhost:8080` by default. Please see the Vite documentation if you wish to change this, or add SSL support.
-
-Once the server is running you can edit any of the files in the `src` folder. Vite will automatically recompile your code and then reload the browser.
-
-## Template Project Structure
-
-We have provided a default project structure to get you started. This is as follows:
-
-## Template Project Structure
-
-We have provided a default project structure to get you started:
-
-| Path                         | Description                                                |
-|------------------------------|------------------------------------------------------------|
-| `index.html`                 | A basic HTML page to contain the game.                     |
-| `public/assets`              | Game sprites, audio, etc. Served directly at runtime.      |
-| `public/style.css`           | Global layout styles.                                      |
-| `src/main.ts`                | Application bootstrap.                                     |
-| `src/game`                   | Folder containing the game code.                           |
-| `src/game/main.ts`           | Game entry point: configures and starts the game.          |
-| `src/game/scenes`            | Folder with all Phaser game scenes.                        | 
-
-
-## Handling Assets
-
-Vite supports loading assets via JavaScript module `import` statements.
-
-This template provides support for both embedding assets and also loading them from a static folder. To embed an asset, you can import it at the top of the JavaScript file you are using it in:
-
-```js
-import logoImg from './assets/logo.png'
-```
-
-To load static files such as audio files, videos, etc place them into the `public/assets` folder. Then you can use this path in the Loader calls within Phaser:
-
-```js
-preload ()
-{
-    //  This is an example of an imported bundled image.
-    //  Remember to import it at the top of this file
-    this.load.image('logo', logoImg);
-
-    //  This is an example of loading a static image
-    //  from the public/assets folder:
-    this.load.image('background', 'assets/bg.png');
-}
-```
-
-When you issue the `npm run build` command, all static assets are automatically copied to the `dist/assets` folder.
-
-## Deploying to Production
-
-After you run the `npm run build` command, your code will be built into a single bundle and saved to the `dist` folder, along with any other assets your project imported, or stored in the public assets folder.
-
-In order to deploy your game, you will need to upload *all* of the contents of the `dist` folder to a public facing web server.
-
-## Customizing the Template
-
-### Vite
-
-If you want to customize your build, such as adding plugin (i.e. for loading CSS or fonts), you can modify the `vite/config.*.mjs` file for cross-project changes, or you can modify and/or create new configuration files and target them in specific npm tasks inside of `package.json`. Please see the [Vite documentation](https://vitejs.dev/) for more information.
-
-## About log.js
-
-If you inspect our node scripts you will see there is a file called `log.js`. This file makes a single silent API call to a domain called `gryzor.co`. This domain is owned by Phaser Studio Inc. The domain name is a homage to one of our favorite retro games.
-
-We send the following 3 pieces of data to this API: The name of the template being used (vue, react, etc). If the build was 'dev' or 'prod' and finally the version of Phaser being used.
-
-At no point is any personal data collected or sent. We don't know about your project files, device, browser or anything else. Feel free to inspect the `log.js` file to confirm this.
-
-Why do we do this? Because being open source means we have no visible metrics about which of our templates are being used. We work hard to maintain a large and diverse set of templates for Phaser developers and this is our small anonymous way to determine if that work is actually paying off, or not. In short, it helps us ensure we're building the tools for you.
-
-However, if you don't want to send any data, you can use these commands instead:
-
-Dev:
+## 실행 방법
 
 ```bash
-npm run dev-nolog
+npm install
+npm run dev
 ```
 
-Build:
+빌드:
 
 ```bash
-npm run build-nolog
+npm run build
 ```
 
-Or, to disable the log entirely, simply delete the file `log.js` and remove the call to it in the `scripts` section of `package.json`:
+## 주요 스크립트
 
-Before:
+| 명령어 | 설명 |
+|---|---|
+| `npm run dev` | 개발 서버 실행 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm run dev-nolog` | 로깅 없이 개발 서버 실행 |
+| `npm run build-nolog` | 로깅 없이 프로덕션 빌드 |
 
-```json
-"scripts": {
-    "dev": "node log.js dev & dev-template-script",
-    "build": "node log.js build & build-template-script"
-},
-```
+## 현재 게임 플로우
 
-After:
+1. `IntroScene`: 서버(과목) 선택
+2. `LobbyScene`: 현재 서버 기준 학습/배틀 허브
+3. `StudyScene`: 문제 풀이 및 스킬 해금
+4. `BattleScene`: 턴제 전투
+5. `ResultScene`: 결과/보상 확인
 
-```json
-"scripts": {
-    "dev": "dev-template-script",
-    "build": "build-template-script"
-},
-```
+## 스킬(문제) 시스템
 
-Either of these will stop `log.js` from running. If you do decide to do this, please could you at least join our Discord and tell us which template you're using! Or send us a quick email. Either will be super-helpful, thank you.
+- 스킬 데이터는 `localStorage`에 저장됩니다.
+- 정답으로 처음 해금한 문제만 고유 스킬로 카운트됩니다.
+- 배틀에서 내 공격 카드 목록은 **현재 서버 과목 + 해금된 문제**로 제한됩니다.
 
-## Join the Phaser Community!
+관련 파일:
 
-We love to see what developers like you create with Phaser! It really motivates us to keep improving. So please join our community and show-off your work 😄
+- `src/game/data/playerProgress.ts`
+- `src/game/data/questions.ts`
 
-**Visit:** The [Phaser website](https://phaser.io) and follow on [Phaser Twitter](https://twitter.com/phaser_)<br />
-**Play:** Some of the amazing games [#madewithphaser](https://twitter.com/search?q=%23madewithphaser&src=typed_query&f=live)<br />
-**Learn:** [API Docs](https://newdocs.phaser.io), [Support Forum](https://phaser.discourse.group/) and [StackOverflow](https://stackoverflow.com/questions/tagged/phaser-framework)<br />
-**Discord:** Join us on [Discord](https://discord.gg/phaser)<br />
-**Code:** 2000+ [Examples](https://labs.phaser.io)<br />
-**Read:** The [Phaser World](https://phaser.io/community/newsletter) Newsletter<br />
+## 서버 시스템
 
-Created by [Phaser Studio](mailto:support@phaser.io). Powered by coffee, anime, pixels and love.
+- 서버는 과목 단위로 분리됩니다.
+  - 역사 / 수학 / 영어 / 과학 / 자격증·상식
+- 서버마다 출제 풀과 공격 스킬 풀이 다르게 적용됩니다.
+- 로비에서 `서버 변경` 버튼으로 언제든 재입장 가능합니다.
 
-The Phaser logo and characters are &copy; 2011 - 2025 Phaser Studio Inc.
+## 개발용 테스트 동작 (중요)
 
-All rights reserved.
+현재 테스트 편의를 위해 다음 로직이 포함되어 있습니다:
+
+- `LobbyScene`에서 `역사` 서버 진입 시
+- 최소 30개 스킬을 자동 지급 (`grantTestSkillsForSubject`)
+
+실서비스/배포 단계에서는 이 동작을 플래그로 분리하거나 제거하는 것을 권장합니다.
+
+## 디렉터리 구조 (요약)
+
+| 경로 | 설명 |
+|---|---|
+| `src/main.ts` | 앱 부트스트랩 |
+| `src/game/main.ts` | Phaser 게임 설정/Scene 등록 |
+| `src/game/scenes` | 게임 씬 |
+| `src/game/data` | 문제/진척도/보상 데이터 |
+| `src/game/ui` | 디자인 토큰 및 UI 유틸 |
+
+## 참고 사항
+
+- 본 프로젝트는 서버 연동 없는 클라이언트 프로토타입입니다.
+- 데이터 저장은 브라우저 로컬 스토리지 기준입니다.
+- UI는 모바일 세로 비율(`540x960`) 기준으로 설계되었습니다.
