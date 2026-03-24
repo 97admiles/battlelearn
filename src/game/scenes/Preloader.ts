@@ -9,38 +9,53 @@ export class Preloader extends Scene
 
     init ()
     {
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'background');
+        // 세로형 모바일 기준 중앙 로딩 박스 UI.
+        const { width, height } = this.scale;
+        this.cameras.main.setBackgroundColor('#0b2240');
 
-        //  A simple progress bar. This is the outline of the bar.
-        this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
+        // 게임 HUD 느낌을 주기 위해 진한 외곽 패널을 먼저 배치한다.
+        this.add.rectangle(width / 2, height / 2, width * 0.86, 220, 0x102f54)
+            .setStrokeStyle(6, 0x72d6c9);
+        this.add.rectangle(width / 2, height / 2, width * 0.82, 200, 0x153f6a)
+            .setStrokeStyle(2, 0xe5dfc9);
 
-        //  This is the progress bar itself. It will increase in size from the left based on the % of progress.
-        const bar = this.add.rectangle(512-230, 384, 4, 28, 0xffffff);
+        this.add.text(width / 2, height / 2 - 58, 'BATTLELEARN', {
+            fontFamily: 'Arial Black',
+            fontSize: '32px',
+            color: '#e9f8ff',
+            stroke: '#0a1a2f',
+            strokeThickness: 6
+        }).setOrigin(0.5);
 
-        //  Use the 'progress' event emitted by the LoaderPlugin to update the loading bar
+        this.add.text(width / 2, height / 2 - 20, '학습 배틀 데이터 준비 중...', {
+            fontFamily: 'Arial',
+            fontSize: '18px',
+            color: '#d7efe9'
+        }).setOrigin(0.5);
+
+        // 로딩 진행 바 외곽선.
+        this.add.rectangle(width / 2, height / 2 + 30, width * 0.62, 32, 0x0d223d)
+            .setStrokeStyle(2, 0xe5dfc9);
+
+        // 진행률에 따라 너비가 확장되는 내부 바.
+        const bar = this.add.rectangle(width / 2 - (width * 0.62) / 2 + 4, height / 2 + 30, 8, 24, 0x72d6c9);
+        bar.setOrigin(0, 0.5);
+
+        // LoaderPlugin progress 이벤트에 연결해 막대를 업데이트한다.
         this.load.on('progress', (progress: number) => {
-
-            //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
-            bar.width = 4 + (460 * progress);
-
+            bar.width = 8 + ((width * 0.62 - 8) * progress);
         });
     }
 
     preload ()
     {
-        //  Load the assets for the game - Replace with your own assets
-        this.load.setPath('assets');
-
-        this.load.image('logo', 'logo.png');
+        // 현재 프로토타입은 도형/텍스트 기반이므로 강제 로딩할 외부 에셋이 없다.
+        // 향후 캐릭터 스프라이트, 사운드, 배경 이미지가 추가되면 이 영역에 적재한다.
     }
 
     create ()
     {
-        //  When all the assets have loaded, it's often worth creating global objects here that the rest of the game can use.
-        //  For example, you can define global animations here, so we can use them in other scenes.
-
-        //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('MainMenu');
+        // 초기 준비가 끝나면 스플래시 씬으로 이동한다.
+        this.scene.start('SplashScene');
     }
 }
