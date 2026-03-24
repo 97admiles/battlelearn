@@ -34,13 +34,16 @@ export const C = {
     battleSurface: 0x334155
 } as const;
 
+/** UI 전역 폰트 — index.html에서 Noto Sans KR 로드 */
+export const FONT_UI = '"Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+
 /** 텍스트 스타일 — 제목은 Bold, 본문은 Regular로 위계를 둔다. */
 export const T = {
-    hero: { fontFamily: 'Arial', fontSize: '28px', color: '#1c2333', fontStyle: 'bold' },
-    title: { fontFamily: 'Arial', fontSize: '20px', color: '#1c2333', fontStyle: 'bold' },
-    body: { fontFamily: 'Arial', fontSize: '15px', color: '#5a6472' },
-    caption: { fontFamily: 'Arial', fontSize: '13px', color: '#8b939e' },
-    label: { fontFamily: 'Arial', fontSize: '12px', color: '#8b939e' },
-    button: { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff', fontStyle: 'bold' },
-    buttonSecondary: { fontFamily: 'Arial', fontSize: '15px', color: '#2563eb', fontStyle: 'bold' }
+    hero: { fontFamily: FONT_UI, fontSize: '28px', color: '#1c2333', fontStyle: 'bold' },
+    title: { fontFamily: FONT_UI, fontSize: '20px', color: '#1c2333', fontStyle: 'bold' },
+    body: { fontFamily: FONT_UI, fontSize: '15px', color: '#5a6472' },
+    caption: { fontFamily: FONT_UI, fontSize: '13px', color: '#8b939e' },
+    label: { fontFamily: FONT_UI, fontSize: '12px', color: '#8b939e' },
+    button: { fontFamily: FONT_UI, fontSize: '16px', color: '#ffffff', fontStyle: 'bold' },
+    buttonSecondary: { fontFamily: FONT_UI, fontSize: '15px', color: '#2563eb', fontStyle: 'bold' }
 } as const;

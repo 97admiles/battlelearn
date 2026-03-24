@@ -1,5 +1,8 @@
 import { Scene } from 'phaser';
 import { shopItems } from '../data/shop';
+import { C, T } from '../ui/designTokens';
+import { fillRoundedPanel } from '../ui/drawRoundedRect';
+import { addRoundedRectButton } from '../ui/roundedButton';
 
 export class ShopScene extends Scene
 {
@@ -11,65 +14,94 @@ export class ShopScene extends Scene
     create ()
     {
         const { width, height } = this.scale;
-        this.cameras.main.setBackgroundColor('#eef5ff');
+        this.cameras.main.setBackgroundColor('#f4f6f9');
         const bg = this.add.graphics();
-        bg.fillGradientStyle(0xf5f8ff, 0xf5f8ff, 0xe9f7ff, 0xe9f7ff, 1);
+        bg.fillGradientStyle(C.page, C.page, 0xeff6ff, C.page, 1);
         bg.fillRect(0, 0, width, height);
 
-        this.add.text(20, 20, '상점 / 스페셜 오퍼', { fontFamily: 'Arial Black', fontSize: '30px', color: '#43629b' });
-        this.add.text(width - 20, 22, '골드 12,840 · 젬 1,420 · 티켓 6', { fontFamily: 'Arial', fontSize: '14px', color: '#6a84b7' }).setOrigin(1, 0);
+        const header = this.add.graphics();
+        fillRoundedPanel(header, 12, 12, width - 24, 92, 14, C.surface, C.border, 1);
+        this.add.text(24, 30, '상점', { ...T.title, fontSize: '18px' });
+        this.add.text(24, 54, '학습 효율을 높이는 데모 상품', { ...T.caption });
+        this.add.text(width - 24, 30, '골드 12,840', { ...T.caption, color: '#5a6472' }).setOrigin(1, 0);
+        this.add.text(width - 24, 50, '젬 1,420 · 티켓 6', { ...T.caption, color: '#5a6472' }).setOrigin(1, 0);
 
-        this.createBanner(width / 2, 84, width - 24, 38, 0x4e6bd3, '첫 구매 보너스');
-        this.createBanner(width / 2, 126, width - 24, 34, 0x5d4eb3, '한정 스타터 패키지');
-        this.createBanner(width / 2, 164, width - 24, 34, 0x3d7cad, '이번 주 추천 번들');
+        const promos = this.add.graphics();
+        fillRoundedPanel(promos, 12, 112, width - 24, 64, 12, C.accentSoft, C.border, 1);
+        this.add.text(24, 126, '첫 구매 보너스 + 이번 주 추천 번들', { ...T.body, fontSize: '13px', color: '#1d4ed8', fontStyle: 'bold' });
+        this.add.text(24, 148, '실제 결제는 연결되지 않은 데모 화면입니다.', { ...T.caption, fontSize: '12px' });
 
-        let y = 196;
-        shopItems.forEach((item) => {
-            const card = this.add.rectangle(width / 2, y + 52, width - 24, 96, 0xffffff).setStrokeStyle(2, 0xc2d6fb).setInteractive({ useHandCursor: true });
-            this.add.rectangle(70, y + 52, 92, 70, 0x8aa4e8).setStrokeStyle(1, 0xe5efff);
-            this.add.text(70, y + 52, item.recommendedTag, { fontFamily: 'Arial Black', fontSize: '12px', color: '#ffffff', align: 'center', wordWrap: { width: 84 } }).setOrigin(0.5);
-            this.add.text(124, y + 20, item.name, { fontFamily: 'Arial Black', fontSize: '18px', color: '#475f95' });
-            this.add.text(124, y + 44, item.description, { fontFamily: 'Arial', fontSize: '13px', color: '#6884b9' });
-            this.add.text(124, y + 66, `${item.banner}${item.limited ? ' · LIMITED' : ''}`, { fontFamily: 'Arial', fontSize: '12px', color: '#c36f66' });
-            this.add.text(width - 24, y + 20, item.priceLabel, { fontFamily: 'Arial Black', fontSize: '18px', color: '#8c69d9' }).setOrigin(1, 0);
-            const buy = this.add.rectangle(width - 72, y + 64, 90, 34, 0x4f99ff).setStrokeStyle(1, 0xe8f1ff).setInteractive({ useHandCursor: true });
-            this.add.text(width - 72, y + 64, '구매', { fontFamily: 'Arial Black', fontSize: '16px', color: '#ffffff' }).setOrigin(0.5);
-            buy.on('pointerdown', () => this.toast(`${item.name} 구매는 데모에서 비활성화되어 있습니다.`));
-            card.on('pointerover', () => card.setScale(1.005));
-            card.on('pointerout', () => card.setScale(1));
-            y += 104;
+        const list = this.add.graphics();
+        fillRoundedPanel(list, 12, 184, width - 24, 492, 14, C.surface, C.border, 1);
+        let y = 200;
+        shopItems.slice(0, 4).forEach((item) => {
+            const card = this.add.rectangle(width / 2, y + 52, width - 36, 96, 0xf8fafc).setStrokeStyle(1, C.borderStrong).setInteractive({ useHandCursor: true });
+            this.add.rectangle(54, y + 52, 58, 58, item.limited ? 0x8b5cf6 : 0x3b82f6).setStrokeStyle(1, 0xe5efff);
+            this.add.text(54, y + 50, item.recommendedTag, { ...T.caption, fontSize: '10px', color: '#ffffff', align: 'center', wordWrap: { width: 52 } }).setOrigin(0.5);
+            this.add.text(92, y + 22, item.name, { ...T.body, fontSize: '14px', color: '#1c2333', fontStyle: 'bold' });
+            this.add.text(92, y + 42, item.description, { ...T.caption, fontSize: '11px', wordWrap: { width: width - 230 } });
+            this.add.text(92, y + 62, `${item.banner}${item.limited ? ' · LIMITED' : ''}`, { ...T.caption, fontSize: '11px', color: '#b45309' });
+            this.add.text(width - 100, y + 22, item.priceLabel, { ...T.body, fontSize: '14px', color: '#7c3aed', fontStyle: 'bold' }).setOrigin(1, 0);
+            const buy = addRoundedRectButton(this, width - 70, y + 62, 92, 34, {
+                fill: C.accent,
+                fillHover: C.accentHover,
+                stroke: C.accentHover,
+                radius: 10,
+                label: '구매',
+                textStyle: { ...T.button, fontSize: '13px' },
+                onClick: () => this.toast(`${item.name} 구매는 데모에서 비활성화되어 있습니다.`)
+            });
+            card.on('pointerover', () => card.setFillStyle(0xf1f5f9));
+            card.on('pointerout', () => card.setFillStyle(0xf8fafc));
+            buy.graphics.setDepth(2);
+            buy.text.setDepth(3);
+            y += 106;
         });
 
-        this.add.text(width / 2, height - 82, '실제 결제는 연결되지 않은 데모 화면입니다.', {
-            fontFamily: 'Arial',
-            fontSize: '14px',
-            color: '#6e84b6'
-        }).setOrigin(0.5);
-
-        const passBtn = this.createButton(width / 2 - 110, height - 40, 200, 50, 0x6051b8, '시즌 패스');
-        const lobbyBtn = this.createButton(width / 2 + 110, height - 40, 200, 50, 0x3a4d7f, '로비');
-        passBtn.on('pointerdown', () => this.scene.start('PassScene'));
-        lobbyBtn.on('pointerdown', () => this.scene.start('LobbyScene'));
-    }
-
-    private createBanner (x: number, y: number, w: number, h: number, color: number, text: string): void
-    {
-        this.add.rectangle(x, y, w, h, color).setStrokeStyle(1, 0xcad8ff);
-        this.add.text(20, y - 8, text, { fontFamily: 'Arial Black', fontSize: '15px', color: '#f5f8ff' });
-    }
-
-    private createButton (x: number, y: number, w: number, h: number, color: number, label: string): Phaser.GameObjects.Rectangle
-    {
-        const box = this.add.rectangle(x, y, w, h, color).setStrokeStyle(1, 0xe7eeff).setInteractive({ useHandCursor: true });
-        this.add.text(x, y, label, { fontFamily: 'Arial Black', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
-        return box;
+        addRoundedRectButton(this, width * 0.28, 702, 160, 44, {
+            fill: C.neutralButton,
+            fillHover: 0xf1f5f9,
+            stroke: C.borderStrong,
+            label: '시즌 패스',
+            textStyle: { ...T.buttonSecondary, fontSize: '14px' },
+            onClick: () => this.scene.start('PassScene')
+        });
+        addRoundedRectButton(this, width * 0.72, 702, 160, 44, {
+            fill: C.neutralButton,
+            fillHover: 0xf1f5f9,
+            stroke: C.borderStrong,
+            label: '로비',
+            textStyle: { ...T.buttonSecondary, fontSize: '14px' },
+            onClick: () => this.scene.start('LobbyScene')
+        });
+        this.drawBottomTabs('상점');
     }
 
     private toast (message: string): void
     {
         const { width } = this.scale;
-        const bg = this.add.rectangle(width / 2, 186, width - 56, 40, 0x334f8d).setStrokeStyle(1, 0xcce0ff);
-        const text = this.add.text(width / 2, 186, message, { fontFamily: 'Arial', fontSize: '14px', color: '#edf4ff' }).setOrigin(0.5);
+        const bg = this.add.rectangle(width / 2, 186, width - 56, 40, 0x1e293b).setStrokeStyle(1, 0x334155);
+        const text = this.add.text(width / 2, 186, message, { ...T.caption, fontSize: '12px', color: '#edf4ff' }).setOrigin(0.5);
         this.tweens.add({ targets: [bg, text], alpha: 0, duration: 700, delay: 600, onComplete: () => { bg.destroy(); text.destroy(); } });
+    }
+
+    private drawBottomTabs (activeLabel: '홈' | '배틀' | '덱' | '문제' | '상점'): void
+    {
+        const { width, height } = this.scale;
+        const tabs = [
+            { label: '홈', scene: 'LobbyScene' },
+            { label: '배틀', scene: 'BattleScene' },
+            { label: '덱', scene: 'DeckScene' },
+            { label: '문제', scene: 'QuestionInventoryScene' },
+            { label: '상점', scene: 'ShopScene' }
+        ];
+        const tabW = (width - 20) / tabs.length;
+        tabs.forEach((tab, i) => {
+            const x = 10 + (tabW / 2) + (tabW * i);
+            const active = tab.label === activeLabel;
+            const box = this.add.rectangle(x, height - 28, tabW - 8, 44, active ? C.accentSoft : C.surface).setStrokeStyle(1, active ? C.accent : C.border).setInteractive({ useHandCursor: true });
+            this.add.text(x, height - 28, tab.label, { ...T.caption, fontSize: '13px', color: active ? '#2563eb' : '#5a6472', fontStyle: active ? 'bold' : 'normal' }).setOrigin(0.5);
+            box.on('pointerdown', () => this.scene.start(tab.scene));
+        });
     }
 }

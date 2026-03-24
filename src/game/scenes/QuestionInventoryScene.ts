@@ -1,5 +1,9 @@
 import { Scene } from 'phaser';
 import { questionBank } from '../data/questions';
+import { getSolvedQuestionIds } from '../data/playerProgress';
+import { C, T } from '../ui/designTokens';
+import { fillRoundedPanel } from '../ui/drawRoundedRect';
+import { addRoundedRectButton } from '../ui/roundedButton';
 
 export class QuestionInventoryScene extends Scene
 {
@@ -11,56 +15,89 @@ export class QuestionInventoryScene extends Scene
     create ()
     {
         const { width, height } = this.scale;
-        this.cameras.main.setBackgroundColor('#eef5ff');
+        this.cameras.main.setBackgroundColor('#f4f6f9');
         const bg = this.add.graphics();
-        bg.fillGradientStyle(0xf4f8ff, 0xf4f8ff, 0xe7faf5, 0xe7faf5, 1);
+        bg.fillGradientStyle(C.page, C.page, 0xeff6ff, C.page, 1);
         bg.fillRect(0, 0, width, height);
 
-        this.add.text(20, 20, '문제 보유함 / 문제 아카이브', { fontFamily: 'Arial Black', fontSize: '30px', color: '#45639a' });
-        this.add.rectangle(width / 2, 84, width - 20, 44, 0xffffff).setStrokeStyle(1, 0xc3d6fa);
-        this.add.text(20, 72, '과목: 전체 역사 수학 영어 과학 자격증  |  난이도: 초급 중급 심화 챌린지  |  정렬: 최신/난이도/즐겨찾기', {
-            fontFamily: 'Arial',
-            fontSize: '14px',
-            color: '#6783b8'
-        });
+        const solved = getSolvedQuestionIds();
+        const header = this.add.graphics();
+        fillRoundedPanel(header, 12, 12, width - 24, 92, 14, C.surface, C.border, 1);
+        this.add.text(24, 30, '문제 보유함', { ...T.title, fontSize: '18px' });
+        this.add.text(24, 54, `획득 문항 ${solved.size}개 · 전체 ${questionBank.length}개`, { ...T.caption });
+        this.add.text(width - 24, 30, '필터: 과목/난이도', { ...T.caption }).setOrigin(1, 0);
+        this.add.text(width - 24, 52, '정렬: 최신순', { ...T.caption, color: '#2563eb' }).setOrigin(1, 0);
 
-        let y = 112;
-        questionBank.slice(0, 8).forEach((q, idx) => {
-            const card = this.add.rectangle(width / 2, y + 44, width - 24, 80, 0xffffff).setStrokeStyle(2, 0xc1d5fb);
+        const chips = this.add.graphics();
+        fillRoundedPanel(chips, 12, 112, width - 24, 48, 12, C.surface, C.border, 1);
+        this.add.text(24, 130, '전체 · 역사 · 수학 · 영어 · 과학 · 자격증/상식', { ...T.caption, fontSize: '12px' });
+
+        const listCard = this.add.graphics();
+        fillRoundedPanel(listCard, 12, 170, width - 24, 506, 14, C.surface, C.border, 1);
+        let y = 186;
+        questionBank.slice(0, 6).forEach((q, idx) => {
+            const card = this.add.rectangle(width / 2, y + 34, width - 38, 66, 0xf8fafc).setStrokeStyle(1, C.borderStrong);
             const badgeColor = q.difficulty === '챌린지' ? 0xd85f7f : q.difficulty === '심화' ? 0x7d6be4 : q.difficulty === '중급' ? 0x3d8fd4 : 0x40b88a;
-            this.add.rectangle(66, y + 28, 86, 24, badgeColor).setStrokeStyle(1, 0xe6efff);
-            this.add.text(66, y + 28, `${q.subject}`, { fontFamily: 'Arial Black', fontSize: '13px', color: '#ffffff' }).setOrigin(0.5);
-            this.add.text(118, y + 18, `[${q.difficulty}] ${q.question.slice(0, 35)}...`, { fontFamily: 'Arial Black', fontSize: '15px', color: '#475f95' });
-            this.add.text(118, y + 40, `보상 XP ${q.rewardXp} · 지식 ${q.rewardKnowledge} · 추천 배틀: ${q.subject} 모드`, { fontFamily: 'Arial', fontSize: '13px', color: '#6884b9' });
-            this.add.text(width - 30, y + 26, idx % 2 === 0 ? '★' : '☆', { fontFamily: 'Arial Black', fontSize: '24px', color: '#ffdf8e' }).setOrigin(1, 0.5);
-            this.add.text(width - 30, y + 50, '보유', { fontFamily: 'Arial', fontSize: '12px', color: '#9ff0d6' }).setOrigin(1, 0.5);
+            this.add.rectangle(54, y + 23, 64, 22, badgeColor).setStrokeStyle(1, 0xe6efff);
+            this.add.text(54, y + 23, q.subject, { ...T.caption, fontSize: '11px', color: '#ffffff', fontStyle: 'bold' }).setOrigin(0.5);
+            this.add.text(92, y + 16, `[${q.difficulty}] ${q.question.slice(0, 24)}...`, { ...T.body, fontSize: '13px', color: '#1c2333', fontStyle: 'bold' });
+            this.add.text(92, y + 35, `XP ${q.rewardXp} · 지식 ${q.rewardKnowledge} · 공격 ${q.damage} / 리스크 ${q.risk}`, { ...T.caption, fontSize: '11px' });
+            const own = solved.has(q.id);
+            this.add.text(width - 30, y + 24, own ? '획득' : '미획득', { ...T.caption, fontSize: '11px', color: own ? '#059669' : '#94a3b8', fontStyle: 'bold' }).setOrigin(1, 0.5);
+            this.add.text(width - 30, y + 42, idx % 2 === 0 ? '★' : '☆', { ...T.caption, fontSize: '18px', color: '#f59e0b' }).setOrigin(1, 0.5);
             card.on('pointerdown', () => this.flashInfo(`문제 상세(mock): ${q.id}`));
             card.setInteractive({ useHandCursor: true });
-            y += 88;
+            y += 78;
         });
 
-        const lobby = this.createButton(80, height - 40, 130, 48, 0x3a4d7f, '로비');
-        const battle = this.createButton(width - 90, height - 40, 150, 48, 0x4f99ff, '배틀 진입');
-        lobby.on('pointerdown', () => this.scene.start('LobbyScene'));
-        battle.on('pointerdown', () =>
-        {
-            const sub = this.registry.get('currentSubject');
-            this.scene.start('BattleScene', { subject: sub });
+        addRoundedRectButton(this, width * 0.28, 702, 160, 44, {
+            fill: C.neutralButton,
+            fillHover: 0xf1f5f9,
+            stroke: C.borderStrong,
+            label: '로비',
+            textStyle: { ...T.buttonSecondary, fontSize: '14px' },
+            onClick: () => this.scene.start('LobbyScene')
         });
-    }
-
-    private createButton (x: number, y: number, w: number, h: number, color: number, label: string): Phaser.GameObjects.Rectangle
-    {
-        const box = this.add.rectangle(x, y, w, h, color).setStrokeStyle(1, 0xdeebff).setInteractive({ useHandCursor: true });
-        this.add.text(x, y, label, { fontFamily: 'Arial Black', fontSize: '20px', color: '#ffffff' }).setOrigin(0.5);
-        return box;
+        addRoundedRectButton(this, width * 0.72, 702, 160, 44, {
+            fill: C.accent,
+            fillHover: C.accentHover,
+            stroke: C.accentHover,
+            label: '배틀 진입',
+            textStyle: { ...T.button, fontSize: '14px' },
+            onClick: () =>
+            {
+                const sub = this.registry.get('currentSubject');
+                this.scene.start('BattleScene', { subject: sub });
+            }
+        });
+        this.drawBottomTabs('문제');
     }
 
     private flashInfo (message: string): void
     {
         const { width } = this.scale;
-        const bg = this.add.rectangle(width / 2, 96, width - 40, 38, 0x37508a).setStrokeStyle(1, 0xc8d8ff);
-        const text = this.add.text(width / 2, 96, message, { fontFamily: 'Arial', fontSize: '15px', color: '#eef3ff' }).setOrigin(0.5);
+        const bg = this.add.rectangle(width / 2, 96, width - 40, 40, 0x1e293b).setStrokeStyle(1, 0x334155);
+        const text = this.add.text(width / 2, 96, message, { ...T.caption, fontSize: '12px', color: '#eef3ff' }).setOrigin(0.5);
         this.tweens.add({ targets: [bg, text], alpha: 0, duration: 700, delay: 500, onComplete: () => { bg.destroy(); text.destroy(); } });
+    }
+
+    private drawBottomTabs (activeLabel: '홈' | '배틀' | '덱' | '문제' | '상점'): void
+    {
+        const { width, height } = this.scale;
+        const tabs = [
+            { label: '홈', scene: 'LobbyScene' },
+            { label: '배틀', scene: 'BattleScene' },
+            { label: '덱', scene: 'DeckScene' },
+            { label: '문제', scene: 'QuestionInventoryScene' },
+            { label: '상점', scene: 'ShopScene' }
+        ];
+        const tabW = (width - 20) / tabs.length;
+        tabs.forEach((tab, i) => {
+            const x = 10 + (tabW / 2) + (tabW * i);
+            const active = tab.label === activeLabel;
+            const box = this.add.rectangle(x, height - 28, tabW - 8, 44, active ? C.accentSoft : C.surface).setStrokeStyle(1, active ? C.accent : C.border).setInteractive({ useHandCursor: true });
+            this.add.text(x, height - 28, tab.label, { ...T.caption, fontSize: '13px', color: active ? '#2563eb' : '#5a6472', fontStyle: active ? 'bold' : 'normal' }).setOrigin(0.5);
+            box.on('pointerdown', () => this.scene.start(tab.scene));
+        });
     }
 }

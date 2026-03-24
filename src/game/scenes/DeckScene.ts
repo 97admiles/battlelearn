@@ -1,5 +1,8 @@
 import { Scene } from 'phaser';
 import { equippedDeckIds, skillCards } from '../data/skillCards';
+import { C, T } from '../ui/designTokens';
+import { fillRoundedPanel } from '../ui/drawRoundedRect';
+import { addRoundedRectButton } from '../ui/roundedButton';
 
 export class DeckScene extends Scene
 {
@@ -11,69 +14,91 @@ export class DeckScene extends Scene
     create ()
     {
         const { width, height } = this.scale;
-        this.cameras.main.setBackgroundColor('#eef5ff');
+        this.cameras.main.setBackgroundColor('#f4f6f9');
         const bg = this.add.graphics();
-        bg.fillGradientStyle(0xf4f8ff, 0xf4f8ff, 0xe8fbf6, 0xe8fbf6, 1);
+        bg.fillGradientStyle(C.page, C.page, 0xeff6ff, C.page, 1);
         bg.fillRect(0, 0, width, height);
 
-        this.add.text(20, 20, '덱 편성 / 스킬카드 관리', { fontFamily: 'Arial Black', fontSize: '30px', color: '#3f5e96' });
-        this.add.text(width - 20, 28, 'AI 추천 활성화', { fontFamily: 'Arial', fontSize: '14px', color: '#5e82bb' }).setOrigin(1, 0);
+        const header = this.add.graphics();
+        fillRoundedPanel(header, 12, 12, width - 24, 84, 14, C.surface, C.border, 1);
+        this.add.text(24, 28, '덱 관리', { ...T.title, fontSize: '18px' });
+        this.add.text(24, 52, '배틀에 사용할 스킬 조합을 빠르게 확인하세요.', { ...T.caption });
+        this.add.text(width - 24, 28, `장착 ${equippedDeckIds.length}/6`, { ...T.caption, color: '#1d4ed8', fontStyle: 'bold' }).setOrigin(1, 0);
 
-        // 장착 덱 슬롯
-        this.add.rectangle(width / 2, 120, width - 28, 134, 0xffffff).setStrokeStyle(2, 0xb9cdf5);
-        this.add.text(24, 76, '현재 장착 덱 (5/6)', { fontFamily: 'Arial Black', fontSize: '18px', color: '#4a689e' });
+        const equipCard = this.add.graphics();
+        fillRoundedPanel(equipCard, 12, 106, width - 24, 130, 14, C.surface, C.border, 1);
+        this.add.text(24, 120, '현재 장착 덱', { ...T.body, color: '#1c2333', fontStyle: 'bold' });
         for (let i = 0; i < 6; i++)
         {
-            const x = 24 + (i * 84);
+            const slotW = (width - 48 - (5 * 8)) / 6;
+            const x = 24 + (i * (slotW + 8));
             const active = i < equippedDeckIds.length;
-            this.add.rectangle(x + 38, 126, 72, 80, active ? 0x7fa9ff : 0xdde6fb).setStrokeStyle(2, active ? 0xf3f8ff : 0xb2c5ee);
-            this.add.text(x + 38, 126, active ? `${i + 1}` : '+', { fontFamily: 'Arial Black', fontSize: '24px', color: active ? '#ffffff' : '#4f6798' }).setOrigin(0.5);
+            const cx = x + (slotW / 2);
+            this.add.rectangle(cx, 176, slotW, 66, active ? 0xdbeafe : 0xf1f5f9).setStrokeStyle(1, active ? 0x93c5fd : C.borderStrong);
+            this.add.text(cx, 170, active ? `슬롯 ${i + 1}` : '비어 있음', { ...T.caption, fontSize: '11px', color: active ? '#1d4ed8' : '#64748b' }).setOrigin(0.5);
+            this.add.text(cx, 188, active ? '사용 중' : '+', { ...T.body, fontSize: active ? '13px' : '16px', color: active ? '#0369a1' : '#64748b', fontStyle: 'bold' }).setOrigin(0.5);
         }
 
-        // 스탯
-        this.add.rectangle(width / 2, 232, width - 28, 92, 0xffffff).setStrokeStyle(2, 0xbad0f7);
-        const stats = ['공격 78', '오답 방어 61', '개념 이해 84', '기억 지속력 71', '복습 효율 88'];
-        stats.forEach((s, i) => this.add.text(26 + (i * 102), 220, s, { fontFamily: 'Arial', fontSize: '14px', color: '#5f78ad' }));
+        const listCard = this.add.graphics();
+        fillRoundedPanel(listCard, 12, 246, width - 24, 430, 14, C.surface, C.border, 1);
+        this.add.text(24, 260, '추천 카드', { ...T.body, color: '#1c2333', fontStyle: 'bold' });
 
-        // 필터
-        this.add.rectangle(width / 2, 286, width - 28, 42, 0xf8fbff).setStrokeStyle(1, 0xc5d8fb);
-        this.add.text(24, 274, '필터: 공격형 · 방어형 · 복습형 · 서포트형', { fontFamily: 'Arial', fontSize: '14px', color: '#5f78ad' });
-
-        // 카드 목록
-        let y = 318;
-        skillCards.slice(0, 6).forEach((card) => {
-            this.add.rectangle(width / 2, y + 44, width - 28, 82, 0xffffff).setStrokeStyle(2, 0xc1d5fb);
-            this.add.rectangle(64, y + 44, 78, 62, Number(card.colorTheme.replace('#', '0x'))).setStrokeStyle(1, 0xe7eeff);
-            this.add.text(64, y + 44, card.rarity.substring(0, 1), { fontFamily: 'Arial Black', fontSize: '24px', color: '#ffffff' }).setOrigin(0.5);
-            this.add.text(116, y + 18, `${card.name} [${card.rarity}]`, { fontFamily: 'Arial Black', fontSize: '17px', color: '#465f95' });
-            this.add.text(116, y + 40, `${card.type} · 비용 ${card.resourceCost} · 추천 ${card.recommendedSubjects.join('/')}`, { fontFamily: 'Arial', fontSize: '13px', color: '#6783b7' });
-            this.add.text(116, y + 58, card.effect, { fontFamily: 'Arial', fontSize: '13px', color: '#3da58c' });
-            y += 90;
+        let y = 282;
+        skillCards.slice(0, 4).forEach((card) => {
+            this.add.rectangle(width / 2, y + 44, width - 40, 82, 0xf8fafc).setStrokeStyle(1, C.borderStrong);
+            this.add.rectangle(54, y + 44, 56, 56, Number(card.colorTheme.replace('#', '0x'))).setStrokeStyle(1, 0xe7eeff);
+            this.add.text(54, y + 44, card.rarity.substring(0, 1), { ...T.button, fontSize: '18px' }).setOrigin(0.5);
+            this.add.text(92, y + 26, `${card.name} · ${card.type}`, { ...T.body, fontSize: '14px', color: '#1e293b', fontStyle: 'bold' });
+            this.add.text(92, y + 46, `비용 ${card.resourceCost} · 추천 ${card.recommendedSubjects.join('/')}`, { ...T.caption, fontSize: '12px' });
+            this.add.text(92, y + 62, card.effect, { ...T.caption, fontSize: '12px', color: '#059669' });
+            y += 94;
         });
 
-        const equipBtn = this.createButton(width - 124, height - 120, 210, 56, 0x4f99ff, '장착');
-        const removeBtn = this.createButton(width - 124, height - 56, 210, 48, 0x5b4f9f, '해제');
-        equipBtn.on('pointerdown', () => this.flashToast('선택 카드 장착 완료 (mock)'));
-        removeBtn.on('pointerdown', () => this.flashToast('선택 카드 해제 완료 (mock)'));
+        addRoundedRectButton(this, width * 0.28, 702, 160, 44, {
+            fill: C.neutralButton,
+            fillHover: 0xf1f5f9,
+            stroke: C.borderStrong,
+            label: '카드 장착',
+            textStyle: { ...T.buttonSecondary, fontSize: '14px' },
+            onClick: () => this.flashToast('선택 카드 장착 완료 (데모)')
+        });
+        addRoundedRectButton(this, width * 0.72, 702, 160, 44, {
+            fill: C.neutralButton,
+            fillHover: 0xf1f5f9,
+            stroke: C.borderStrong,
+            label: '카드 해제',
+            textStyle: { ...T.buttonSecondary, fontSize: '14px' },
+            onClick: () => this.flashToast('선택 카드 해제 완료 (데모)')
+        });
 
-        const navLobby = this.createButton(84, height - 56, 128, 48, 0x3a4d7f, '로비');
-        navLobby.on('pointerdown', () => this.scene.start('LobbyScene'));
-    }
-
-    private createButton (x: number, y: number, w: number, h: number, color: number, label: string): Phaser.GameObjects.Rectangle
-    {
-        const box = this.add.rectangle(x, y, w, h, color).setStrokeStyle(1, 0xdde9ff).setInteractive({ useHandCursor: true });
-        this.add.text(x, y, label, { fontFamily: 'Arial Black', fontSize: `${Math.floor(h * 0.43)}px`, color: '#ffffff' }).setOrigin(0.5);
-        box.on('pointerover', () => box.setScale(1.02));
-        box.on('pointerout', () => box.setScale(1));
-        return box;
+        this.drawBottomTabs('덱');
     }
 
     private flashToast (message: string): void
     {
         const { width } = this.scale;
-        const toast = this.add.rectangle(width / 2, 170, width - 60, 40, 0x2f4f8f).setStrokeStyle(1, 0xc4d7ff);
-        const text = this.add.text(width / 2, 170, message, { fontFamily: 'Arial', fontSize: '16px', color: '#f2f6ff' }).setOrigin(0.5);
+        const toast = this.add.rectangle(width / 2, 160, width - 60, 42, 0x1e293b, 0.94).setStrokeStyle(1, 0x334155);
+        const text = this.add.text(width / 2, 160, message, { ...T.body, fontSize: '13px', color: '#f8fafc' }).setOrigin(0.5);
         this.tweens.add({ targets: [toast, text], alpha: 0, y: '-=10', duration: 700, delay: 500, onComplete: () => { toast.destroy(); text.destroy(); } });
+    }
+
+    private drawBottomTabs (activeLabel: '홈' | '배틀' | '덱' | '문제' | '상점'): void
+    {
+        const { width, height } = this.scale;
+        const tabs = [
+            { label: '홈', scene: 'LobbyScene' },
+            { label: '배틀', scene: 'BattleScene' },
+            { label: '덱', scene: 'DeckScene' },
+            { label: '문제', scene: 'QuestionInventoryScene' },
+            { label: '상점', scene: 'ShopScene' }
+        ];
+        const tabW = (width - 20) / tabs.length;
+        tabs.forEach((tab, i) => {
+            const x = 10 + (tabW / 2) + (tabW * i);
+            const active = tab.label === activeLabel;
+            const box = this.add.rectangle(x, height - 28, tabW - 8, 44, active ? C.accentSoft : C.surface).setStrokeStyle(1, active ? C.accent : C.border).setInteractive({ useHandCursor: true });
+            this.add.text(x, height - 28, tab.label, { ...T.caption, fontSize: '13px', color: active ? '#2563eb' : '#5a6472', fontStyle: active ? 'bold' : 'normal' }).setOrigin(0.5);
+            box.on('pointerdown', () => this.scene.start(tab.scene));
+        });
     }
 }

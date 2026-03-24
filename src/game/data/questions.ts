@@ -442,6 +442,60 @@ export function difficultyTier (difficulty: Difficulty): number
     }
 }
 
+/**
+ * 해당 과목에서 푼 고유 문항 수 기준 학습 레벨(1~10).
+ * 은행 난이도 밴드(초급~챌린지)를 좁히는 데 사용한다.
+ */
+export function learnerLevelFromSolvedInSubject (solvedInSubject: number): number
+{
+    return Math.max(1, Math.min(10, 1 + Math.floor(Math.max(0, solvedInSubject) / 3)));
+}
+
+export function difficultyBandForLevel (level: number): readonly Difficulty[]
+{
+    const L = Math.max(1, Math.min(10, level));
+    if (L <= 2) return ['초급'];
+    if (L <= 4) return ['초급', '중급'];
+    if (L <= 6) return ['중급', '심화'];
+    if (L <= 8) return ['중급', '심화', '챌린지'];
+    return ['심화', '챌린지'];
+}
+
+export function bandLabelKo (band: readonly Difficulty[]): string
+{
+    if (band.length === 0) return '전체';
+    if (band.length === 1) return band[0];
+    return `${band[0]} ~ ${band[band.length - 1]}`;
+}
+
+/**
+ * 학습 씬용 — 과목 + 이미 푼 ID + 해당 과목 누적 풀이 수로 난이도 밴드를 맞춘 뒤 출제.
+ * 미해결 우선, 밴드에 문항이 없으면 과목 전체에서 선택.
+ */
+export function pickNextStudyQuestion (
+    subject: Subject,
+    solvedIds: Set<string>,
+    solvedInSubject: number
+): BattleQuestion
+{
+    const level = learnerLevelFromSolvedInSubject(solvedInSubject);
+    const band = difficultyBandForLevel(level);
+    let candidates = questionBank.filter(
+        q => q.subject === subject && band.includes(q.difficulty)
+    );
+    if (candidates.length === 0)
+    {
+        candidates = questionBank.filter(q => q.subject === subject);
+    }
+    if (candidates.length === 0)
+    {
+        candidates = [...questionBank];
+    }
+    const unsolved = candidates.filter(q => !solvedIds.has(q.id));
+    const pool = unsolved.length > 0 ? unsolved : candidates;
+    return pool[Math.floor(Math.random() * pool.length)];
+}
+
 function shuffleCopy<T> (items: readonly T[]): T[]
 {
     const a = [...items];
